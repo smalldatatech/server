@@ -339,7 +339,7 @@ class ShareAPIController extends OCSController {
 		}
 
 		if (!$this->canDeleteShare($share)) {
-			throw new OCSForbiddenException($this->l->t('Could not delete share'));
+			throw new OCSForbiddenException($this->l->t('You\'re not allowed to delete this share'));
 		}
 
 		// if it's a group share or a room share
@@ -831,7 +831,7 @@ class ShareAPIController extends OCSController {
 		$this->lock($share->getNode());
 
 		if (!$this->canEditShare($share)) {
-			throw new OCSForbiddenException($this->l->t('Wrong share ID, share doesn\'t exist'));
+			throw new OCSForbiddenException($this->l->t('You\'re not allowed to edit this share'));
 		}
 
 		if ($permissions === null &&
@@ -1064,7 +1064,7 @@ class ShareAPIController extends OCSController {
 			return true;
 		}
 
-		// we do NOT support some kind of admin
+		// we do NOT support some kind of `admin`
 		// in groups. You cannot edit shares to a group
 		// you're in if you're not the owner!
 

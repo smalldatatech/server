@@ -213,7 +213,7 @@ class ShareAPIControllerTest extends TestCase {
 
 	/**
 	 * @expectedException \OCP\AppFramework\OCS\OCSNotFoundException
-	 * @expectedExceptionMessage could not delete share
+	 * @expectedExceptionMessage You're not allowed to delete this share
 	 */
 	public function testDeleteShareLocked() {
 		$node = $this->getMockBuilder(File::class)->getMock();
@@ -1513,8 +1513,8 @@ class ShareAPIControllerTest extends TestCase {
 	}
 
 	/**
-	 * @expectedException \OCP\AppFramework\OCS\OCSNotFoundException
-	 * @expectedExceptionMessage Wrong share ID, share doesn't exist
+	 * @expectedException \OCP\AppFramework\OCS\OCSForbiddenException
+	 * @expectedExceptionMessage You're not allowed to edit this share
 	 */
 	public function testUpdateShareCantAccess() {
 		$node = $this->getMockBuilder(Folder::class)->getMock();
