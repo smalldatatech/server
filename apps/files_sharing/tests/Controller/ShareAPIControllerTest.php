@@ -1583,8 +1583,8 @@ class ShareAPIControllerTest extends TestCase {
 	}
 
 	/**
-	 * @expectedException \OCP\AppFramework\OCS\OCSForbiddenException
-	 * @expectedExceptionMessage You're not allowed to edit this share
+	 * @expectedException \OCP\AppFramework\OCS\OCSNotFoundException
+	 * @expectedExceptionMessage Wrong share ID, share doesn't exist
 	 */
 	public function testUpdateShareCantAccess() {
 		$node = $this->getMockBuilder(Folder::class)->getMock();

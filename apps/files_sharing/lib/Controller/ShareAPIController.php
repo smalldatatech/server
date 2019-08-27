@@ -339,7 +339,7 @@ class ShareAPIController extends OCSController {
 		}
 
 		if (!$this->canDeleteShare($share)) {
-			throw new OCSForbiddenException($this->l->t('You\'re not allowed to delete this share'));
+			throw new OCSNotFoundException($this->l->t('Wrong share ID, share doesn\'t exist'));
 		}
 
 		// if it's a group share or a room share
@@ -831,7 +831,7 @@ class ShareAPIController extends OCSController {
 		$this->lock($share->getNode());
 
 		if (!$this->canEditShare($share)) {
-			throw new OCSForbiddenException($this->l->t('You\'re not allowed to edit this share'));
+			throw new OCSNotFoundException($this->l->t('Wrong share ID, share doesn\'t exist'));
 		}
 
 		if ($permissions === null &&
