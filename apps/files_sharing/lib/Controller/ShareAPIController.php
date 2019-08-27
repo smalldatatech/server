@@ -1088,7 +1088,7 @@ class ShareAPIController extends OCSController {
 		// if the user is the recipient, i can unshare
 		// the share with self
 		if ($share->getShareType() === Share::SHARE_TYPE_USER
-			&& $share->getSharedWith() !== $this->currentUser) {
+			&& $share->getSharedWith() === $this->currentUser) {
 			return true;
 		}
 

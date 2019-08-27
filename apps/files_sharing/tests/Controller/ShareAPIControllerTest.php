@@ -213,7 +213,7 @@ class ShareAPIControllerTest extends TestCase {
 
 	/**
 	 * @expectedException \OCP\AppFramework\OCS\OCSNotFoundException
-	 * @expectedExceptionMessage You're not allowed to delete this share
+	 * @expectedExceptionMessage Could not delete share
 	 */
 	public function testDeleteShareLocked() {
 		$node = $this->getMockBuilder(File::class)->getMock();
@@ -235,6 +235,76 @@ class ShareAPIControllerTest extends TestCase {
 			->method('lock')
 			->with(\OCP\Lock\ILockingProvider::LOCK_SHARED)
 			->will($this->throwException(new LockedException('mypath')));
+
+		$this->ocs->deleteShare(42);
+	}
+
+	public function testDeleteShareWithMe() {
+		$node = $this->getMockBuilder(File::class)->getMock();
+
+		$share = $this->newShare();
+		$share->setSharedWith($this->currentUser)
+			->setShareType(\OCP\Share::SHARE_TYPE_USER)
+			->setNode($node);
+		$this->shareManager
+			->expects($this->once())
+			->method('getShareById')
+			->with('ocinternal:42')
+			->willReturn($share);
+		$this->shareManager
+			->expects($this->once())
+			->method('deleteShare')
+			->with($share);
+
+		$node->expects($this->once())
+			->method('lock')
+			->with(\OCP\Lock\ILockingProvider::LOCK_SHARED);
+
+		$this->ocs->deleteShare(42);
+	}
+
+	public function testDeleteShareOwner() {
+		$node = $this->getMockBuilder(File::class)->getMock();
+
+		$share = $this->newShare();
+		$share->setSharedBy($this->currentUser)
+			->setNode($node);
+		$this->shareManager
+			->expects($this->once())
+			->method('getShareById')
+			->with('ocinternal:42')
+			->willReturn($share);
+		$this->shareManager
+			->expects($this->once())
+			->method('deleteShare')
+			->with($share);
+
+		$node->expects($this->once())
+			->method('lock')
+			->with(\OCP\Lock\ILockingProvider::LOCK_SHARED);
+
+		$this->ocs->deleteShare(42);
+	}
+
+	public function testDeleteShareFileOwner() {
+		$node = $this->getMockBuilder(File::class)->getMock();
+
+		$share = $this->newShare();
+		$share->setShareOwner($this->currentUser)
+			->setNode($node);
+		$this->shareManager
+			->expects($this->once())
+			->method('getShareById')
+			->with('ocinternal:42')
+			->willReturn($share);
+		$this->shareManager
+			->expects($this->once())
+			->method('deleteShare')
+			->with($share);
+
+		$node->expects($this->once())
+			->method('lock')
+			->with(\OCP\Lock\ILockingProvider::LOCK_SHARED);
 
 		$this->ocs->deleteShare(42);
 	}
