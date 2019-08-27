@@ -338,22 +338,18 @@ class ShareAPIController extends OCSController {
 			throw new OCSNotFoundException($this->l->t('Could not delete share'));
 		}
 
-		if (!$this->canDeleteShare($share)) {
-			throw new OCSNotFoundException($this->l->t('Wrong share ID, share doesn\'t exist'));
-		}
 
 		// if it's a group share or a room share
 		// we don't delete the share, but only the
 		// mount point. Allowing it to be restored
 		// from the deleted shares
-		if ((
-			$share->getShareType() === Share::SHARE_TYPE_GROUP
-				|| $share->getShareType() === Share::SHARE_TYPE_ROOM
-			)
-			&& $share->getShareOwner() !== $this->currentUser
-			&& $share->getSharedBy() !== $this->currentUser) {
+		if ($this->canDeleteShareFromSelf($share)) {
 			$this->shareManager->deleteFromSelf($share, $this->currentUser);
 		} else {
+			if (!$this->canDeleteShare($share)) {
+				throw new OCSNotFoundException($this->l->t('Wrong share ID, share doesn\'t exist'));
+			}
+
 			$this->shareManager->deleteShare($share);
 		}
 
@@ -1095,6 +1091,39 @@ class ShareAPIController extends OCSController {
 		// if EDIT rights to a share, you can delete it
 		if ($this->canEditShare($share)) {
 			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Does the user have delete permission on the share
+	 * This differs from the canDeleteShare function as it only
+	 * remove the share for the current user. It does NOT
+	 * completely delete the share but only the mount point.
+	 * It can then be restored from the deleted shares section.
+	 *
+	 * @param \OCP\Share\IShare $share the share to check
+	 * @return boolean
+	 *
+	 * @suppress PhanUndeclaredClassMethod
+	 */
+	protected function canDeleteShareFromSelf(\OCP\Share\IShare $share): bool {
+		// If in the recipient group, you can delete the share from self
+		if ($share->getShareType() === Share::SHARE_TYPE_GROUP) {
+			$sharedWith = $this->groupManager->get($share->getSharedWith());
+			$user = $this->userManager->get($this->currentUser);
+			if ($user !== null && $sharedWith !== null && $sharedWith->inGroup($user)) {
+				return true;
+			}
+		}
+
+		if ($share->getShareType() === Share::SHARE_TYPE_ROOM) {
+			try {
+				return $this->getRoomShareHelper()->canAccessShare($share, $this->currentUser);
+			} catch (QueryException $e) {
+				return false;
+			}
 		}
 
 		return false;
